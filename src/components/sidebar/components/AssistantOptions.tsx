@@ -45,8 +45,9 @@ export function AssistantOptions(props: { data: any, isMobile: boolean, loadProm
 
     return (
         <Flex overflowX={isMobile ? 'scroll' : 'hidden'}>
-            {data?.map((block: any) => (
+            {data?.map((block: any, index: number) => (
                 <Box
+                    key={index}
                     bg={buttonBg}
                     borderRadius="16px"
                     boxShadow="md"
@@ -58,8 +59,9 @@ export function AssistantOptions(props: { data: any, isMobile: boolean, loadProm
                     <Box textAlign="left" mb="4">
                         <Text fontWeight="bold">{block.title}</Text>
                     </Box>
-                    {block.buttons?.map((button: any) => (
+                    {block.buttons?.map((button: any, buttonIndex: number) => (
                         <Button
+                            key={buttonIndex}
                             onClick={() => { 
                                 button.onClick(button.prompt);
                              }}
