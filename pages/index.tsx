@@ -4,6 +4,7 @@
 import Link from '@/components/link/Link';
 import MessageBoxChat from '@/components/MessageBox';
 import { ChatBody, OpenAIModel } from '@/types/types';
+import { createPrompt } from '@/utils/chatStream';
 import {
   Accordion,
   AccordionButton,
@@ -23,10 +24,11 @@ import {
 import { useEffect, useState } from 'react';
 import { MdAutoAwesome, MdBolt, MdEdit, MdPerson } from 'react-icons/md';
 import Bg from '../public/img/chat/bg-image.png';
+import { FaCopy } from 'react-icons/fa';
 
-export default function Chat(props: { apiKeyApp: string }) {
+export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prompt: any, setPrompt: any}) {
   // *** If you use .env.local variable for your API key, method which we recommend, use the apiKey variable commented below
-  const { apiKeyApp } = props;
+  const { apiKeyApp, isMobile, prompt } = props;
   // Input States
   const [inputOnSubmit, setInputOnSubmit] = useState<string>('');
   const [inputCode, setInputCode] = useState<string>('');
@@ -36,6 +38,8 @@ export default function Chat(props: { apiKeyApp: string }) {
   const [model, setModel] = useState<OpenAIModel>('gpt-3.5-turbo');
   // Loading state
   const [loading, setLoading] = useState<boolean>(false);
+
+  const [promptMessages, setPromptMessages] = useState<any>([]);
 
   // API Key
   // const [apiKey, setApiKey] = useState<string>(apiKeyApp);
@@ -60,7 +64,20 @@ export default function Chat(props: { apiKeyApp: string }) {
   );
   const handleTranslate = async () => {
     const apiKey = apiKeyApp;
-    setInputOnSubmit(inputCode);
+    const promptMessagesData = promptMessages;
+
+    const messagePrompt = prompt ? prompt : inputCode
+    const promptFormated = createPrompt(messagePrompt);
+    const messagePromptFormated = { role: 'user', content: promptFormated };
+    promptMessagesData.push(messagePromptFormated);
+
+
+    if(prompt){
+      setInputCode(prompt);
+      setInputOnSubmit(prompt);
+    }else{
+      setInputOnSubmit(inputCode);
+    }
 
     // Chat post conditions(maximum number of characters, valid message etc.)
     const maxCodeLength = model === 'gpt-3.5-turbo' ? 700 : 700;
@@ -70,10 +87,10 @@ export default function Chat(props: { apiKeyApp: string }) {
       return;
     }
 
-    if (!inputCode) {
-      alert('Please enter your message.');
-      return;
-    }
+    // if (!inputCode && prompt !== false) {
+    //   alert('Please enter your message.');
+    //   return;
+    // }
 
     if (inputCode.length > maxCodeLength) {
       alert(
@@ -85,7 +102,8 @@ export default function Chat(props: { apiKeyApp: string }) {
     setLoading(true);
     const controller = new AbortController();
     const body: ChatBody = {
-      inputCode,
+      inputCode: promptMessagesData,
+      // prompt ? prompt : inputCode,
       model,
       apiKey,
     };
@@ -121,26 +139,48 @@ export default function Chat(props: { apiKeyApp: string }) {
     const reader = data.getReader();
     const decoder = new TextDecoder();
     let done = false;
+    let outPutbackup = '';
+
+    promptMessagesData.push({ role: 'system', content: "" });
 
     while (!done) {
       setLoading(true);
+      scrollToBottom();
       const { value, done: doneReading } = await reader.read();
       done = doneReading;
       const chunkValue = decoder.decode(value);
+      outPutbackup =  outPutbackup+chunkValue;
       setOutputCode((prevCode) => prevCode + chunkValue);
+      const outPutCodeFormated = createPrompt(outPutbackup);
+    const messageoutPutCodeFormated = { role: 'system', content: outPutCodeFormated };
+     promptMessagesData[promptMessagesData.length - 1] = messageoutPutCodeFormated;
+     setPromptMessages(promptMessagesData);
+      scrollToBottom();
     }
+    //scrollToBottom();
 
+    // const outPutCodeFormated = createPrompt(outPutbackup);
+    // const messageoutPutCodeFormated = { role: 'system', content: outPutCodeFormated };
+    // promptMessagesData.push(messageoutPutCodeFormated);
+    // setPromptMessages(promptMessagesData);
+
+    
+
+   
+  //scrollToBottom();
+    setInputCode('');
     setLoading(false);
+    props.setPrompt(false);
   };
   // -------------- Copy Response --------------
-  // const copyToClipboard = (text: string) => {
-  //   const el = document.createElement('textarea');
-  //   el.value = text;
-  //   document.body.appendChild(el);
-  //   el.select();
-  //   document.execCommand('copy');
-  //   document.body.removeChild(el);
-  // };
+  const copyToClipboard = (text: string) => {
+    const el = document.createElement('textarea');
+    el.value = text;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+  };
 
   // *** Initializing apiKey with .env.local value
   // useEffect(() => {
@@ -150,6 +190,22 @@ export default function Chat(props: { apiKeyApp: string }) {
   //   setApiKey(apiKeyENV)
   // }
   // }, [])
+
+  const scrollToBottom = () => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight+300,
+      behavior: 'smooth',
+    });
+  };
+
+  useEffect(() => {
+    if (prompt) {
+     setInputCode(prompt);
+     handleTranslate();
+    }
+    }, [prompt])
+
+  
 
   const handleChange = (Event: any) => {
     setInputCode(Event.target.value);
@@ -161,15 +217,16 @@ export default function Chat(props: { apiKeyApp: string }) {
       pt={{ base: '70px', md: '0px' }}
       direction="column"
       position="relative"
+     
     >
-      <Img
+       {/* <Img
         src={Bg.src}
         position={'absolute'}
         w="350px"
         left="50%"
         top="50%"
         transform={'translate(-50%, -50%)'}
-      />
+      />  */}
       <Flex
         direction="column"
         mx="auto"
@@ -177,7 +234,7 @@ export default function Chat(props: { apiKeyApp: string }) {
         minH={{ base: '75vh', '2xl': '85vh' }}
         maxW="1000px"
       >
-        {/* Model Change */}
+        {/* Model Change 
         <Flex direction={'column'} w="100%" mb={outputCode ? '20px' : 'auto'}>
           <Flex
             mx="auto"
@@ -186,7 +243,7 @@ export default function Chat(props: { apiKeyApp: string }) {
             mb="20px"
             borderRadius="60px"
           >
-            <Flex
+           {/* <Flex
               cursor={'pointer'}
               transition="0.3s"
               justify={'center'}
@@ -219,7 +276,7 @@ export default function Chat(props: { apiKeyApp: string }) {
               </Flex>
               GPT-3.5
             </Flex>
-            <Flex
+             <Flex
               cursor={'pointer'}
               transition="0.3s"
               justify={'center'}
@@ -252,9 +309,9 @@ export default function Chat(props: { apiKeyApp: string }) {
               </Flex>
               GPT-4
             </Flex>
-          </Flex>
+          </Flex> */}
 
-          <Accordion color={gray} allowToggle w="100%" my="0px" mx="auto">
+           {/* <Accordion color={gray} allowToggle w="100%" my="0px" mx="auto">
             <AccordionItem border="none">
               <AccordionButton
                 borderBottom="0px solid"
@@ -281,17 +338,23 @@ export default function Chat(props: { apiKeyApp: string }) {
                 </Text>
               </AccordionPanel>
             </AccordionItem>
-          </Accordion>
-        </Flex>
+          </Accordion> 
+        </Flex>  */}
         {/* Main Box */}
         <Flex
           direction="column"
           w="100%"
           mx="auto"
-          display={outputCode ? 'flex' : 'none'}
-          mb={'auto'}
+          display="flex"
+          //display={outputCode ? 'flex' : 'none'}
+         mb="15px"
         >
-          <Flex w="100%" align={'center'} mb="10px">
+
+      {    promptMessages.map((message: any, index: number) => {
+          return  message.role === 'user' ?  (
+
+        <>
+          <Flex w="100%" align={'center'} mb="35px">
             <Flex
               borderRadius="full"
               justify="center"
@@ -311,6 +374,8 @@ export default function Chat(props: { apiKeyApp: string }) {
                 color={brandColor}
               />
             </Flex>
+            
+            
             <Flex
               p="22px"
               border="1px solid"
@@ -325,18 +390,24 @@ export default function Chat(props: { apiKeyApp: string }) {
                 fontSize={{ base: 'sm', md: 'md' }}
                 lineHeight={{ base: '24px', md: '26px' }}
               >
-                {inputOnSubmit}
+                {message?.content}
               </Text>
               <Icon
                 cursor="pointer"
-                as={MdEdit}
+                as={FaCopy}
                 ms="auto"
                 width="20px"
                 height="20px"
+                onClick={() => {
+                  copyToClipboard(message?.content);
+                }}
                 color={gray}
               />
             </Flex>
           </Flex>
+          </>
+            ) : (
+              <>
           <Flex w="100%">
             <Flex
               borderRadius="full"
@@ -355,15 +426,21 @@ export default function Chat(props: { apiKeyApp: string }) {
                 color="white"
               />
             </Flex>
-            <MessageBoxChat output={outputCode} />
+            <MessageBoxChat output={message?.content} copyToClipboard={copyToClipboard}  />
           </Flex>
+          </>
+            )})}
+
         </Flex>
         {/* Chat Input */}
         <Flex
-          ms={{ base: '0px', xl: '60px' }}
-          mt="20px"
-          justifySelf={'flex-end'}
+            ms={{ base: '0px', xl: '-130px' }}
+            mt={ isMobile ?  "-35px" :  "20px"} 
+            // justifySelf={'flex-end'}
+           
         >
+          
+
           <Input
             minH="54px"
             h="100%"
@@ -377,9 +454,12 @@ export default function Chat(props: { apiKeyApp: string }) {
             _focus={{ borderColor: 'none' }}
             color={inputColor}
             _placeholder={placeholderColor}
-            placeholder="Type your message here..."
+            placeholder="Digite uma pergunta ou comando"
+            value={inputCode}
             onChange={handleChange}
           />
+
+       
           <Button
             variant="primary"
             py="20px"
@@ -401,21 +481,21 @@ export default function Chat(props: { apiKeyApp: string }) {
             onClick={handleTranslate}
             isLoading={loading ? true : false}
           >
-            Submit
+            Enviar
           </Button>
         </Flex>
 
-        <Flex
+         <Flex
           justify="center"
           mt="20px"
           direction={{ base: 'column', md: 'row' }}
           alignItems="center"
+          textAlign={{ base: 'center', md: 'left' }}
         >
           <Text fontSize="xs" textAlign="center" color={gray}>
-            Free Research Preview. ChatGPT may produce inaccurate information
-            about people, places, or facts.
-          </Text>
-          <Link href="https://help.openai.com/en/articles/6825453-chatgpt-release-notes">
+          O Tars é um chatbot que utiliza IA generativa para interagir com o usuário, dada a natureza complexa dessa interação pode fornecer informações imprecisas.
+            </Text>
+          {/* <Link href="https://help.openai.com/en/articles/6825453-chatgpt-release-notes">
             <Text
               fontSize="xs"
               color={textColor}
@@ -424,8 +504,8 @@ export default function Chat(props: { apiKeyApp: string }) {
             >
               ChatGPT May 12 Version
             </Text>
-          </Link>
-        </Flex>
+          </Link> */}
+        </Flex> 
       </Flex>
     </Flex>
   );

@@ -70,7 +70,7 @@ export function SearchBar(props: {
         fontWeight="500"
         _placeholder={{ color: 'gray.500', fontSize: '14px' }}
         borderRadius={borderRadius ? borderRadius : '14px'}
-        placeholder="Search..."
+        placeholder="Pesquie aqui..."
       />
     </InputGroup>
   );

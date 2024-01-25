@@ -22,6 +22,7 @@ import APIModal from '@/components/apiModal';
 import Brand from '@/components/sidebar/components/Brand';
 import Links from '@/components/sidebar/components/Links';
 import SidebarCard from '@/components/sidebar/components/SidebarCard';
+import SidebardOptions from '@/components/sidebar/components/SidebardOptions';
 import { RoundedChart } from '@/components/icons/Icons';
 import { PropsWithChildren } from 'react';
 import { IRoute } from '@/types/navigation';
@@ -29,6 +30,7 @@ import { IoMdPerson } from 'react-icons/io';
 import { FiLogOut } from 'react-icons/fi';
 import { LuHistory } from 'react-icons/lu';
 import { MdOutlineManageAccounts, MdOutlineSettings } from 'react-icons/md';
+import SidebarOptions from '@/components/sidebar/components/SidebardOptions';
 
 // FUNCTIONS
 
@@ -63,17 +65,17 @@ function SidebarContent(props: SidebarContent) {
       maxW="285px"
       px="20px"
     >
-      <Brand />
-      <Stack direction="column" mb="auto" mt="8px">
+     {/* <Brand /> */}
+       <Stack direction="column" mb="auto" mt="8px">
         <Box ps="0px" pe={{ md: '0px', '2xl': '0px' }}>
           <Links routes={routes} />
         </Box>
-      </Stack>
+      </Stack> 
 
-      <Box mt="60px" width={'100%'} display={'flex'} justifyContent={'center'}>
-        <SidebarCard />
-      </Box>
-      <APIModal setApiKey={setApiKey} sidebar={true} />
+        {/* <Box mt="60px" width={'100%'} display={'flex'} justifyContent={'center'}>
+        <SidebarOptions />
+      </Box>  
+      <APIModal setApiKey={setApiKey} sidebar={true} />*/}
       <Flex
         mt="8px"
         justifyContent="center"
@@ -82,11 +84,11 @@ function SidebarContent(props: SidebarContent) {
         borderRadius="30px"
         p="14px"
       >
-        <NextAvatar h="34px" w="34px" src={avatar4} me="10px" />
+         {/* <NextAvatar h="34px" w="34px" src={avatar4} me="10px" />
         <Text color={textColor} fontSize="xs" fontWeight="600" me="10px">
           Adela Parkson
-        </Text>
-        <Menu>
+        </Text>  */}
+         <Menu>
           <MenuButton
             as={Button}
             variant="transparent"
@@ -259,7 +261,7 @@ function SidebarContent(props: SidebarContent) {
               </Flex>
             </Box>
           </MenuList>
-        </Menu>
+        </Menu> 
         <Button
           variant="transparent"
           border="1px solid"

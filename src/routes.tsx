@@ -16,7 +16,7 @@ import { IRoute } from './types/navigation';
 
 const routes: IRoute[] = [
   {
-    name: 'Chat UI',
+    name: 'Assistente',
     path: '/',
     icon: (
       <Icon as={MdAutoAwesome} width="20px" height="20px" color="inherit" />
@@ -25,14 +25,14 @@ const routes: IRoute[] = [
   },
   {
     name: 'All Templates',
-    disabled: true,
+    disabled: false,
     path: '/all-templates',
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
     collapse: false,
   },
   {
     name: 'My Projects',
-    disabled: true,
+    disabled: false,
     path: '/my-projects',
     icon: <Icon as={MdLayers} width="20px" height="20px" color="inherit" />,
     collapse: false,
@@ -40,7 +40,7 @@ const routes: IRoute[] = [
   // --- Others ---
   {
     name: 'Other Pages',
-    disabled: true,
+    disabled: false,
     path: '/others',
     icon: <Icon as={MdFileCopy} width="20px" height="20px" color="inherit" />,
     collapse: true,

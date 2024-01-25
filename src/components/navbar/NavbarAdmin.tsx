@@ -9,10 +9,13 @@ import {
   Flex,
   Link,
   useColorModeValue,
+  Button,
+  Text,
 } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
 import AdminNavbarLinks from './NavbarLinksAdmin';
 import { isWindowAvailable } from '@/utils/navigation';
+import NavbarActions from './NavbarActions';
 
 export default function AdminNavbar(props: {
   secondary: boolean;
@@ -92,13 +95,13 @@ export default function AdminNavbar(props: {
       }}
       pt="8px"
       top={{ base: '12px', md: '16px', xl: '18px' }}
-      w={{
-        base: 'calc(100vw - 8%)',
-        md: 'calc(100vw - 8%)',
-        lg: 'calc(100vw - 6%)',
-        xl: 'calc(100vw - 350px)',
-        '2xl': 'calc(100vw - 365px)',
-      }}
+      // w={{
+      //   base: 'calc(100vw - 8%)',
+      //   md: 'calc(100vw - 8%)',
+      //   lg: 'calc(100vw - 6%)',
+      //   xl: 'calc(100vw - 350px)',
+      //   '2xl': 'calc(100vw - 365px)',
+      // }}
     >
       <Flex
         w="100%"
@@ -109,11 +112,17 @@ export default function AdminNavbar(props: {
         alignItems={{ xl: 'center' }}
         mb={gap}
       >
-        <Box mb={{ base: '8px', md: '0px' }}>
-          <Breadcrumb>
+
+
+        <Box mb={{ base: '28px', md: '0px' }}>
+          
+        
+
+
+          {/* <Breadcrumb>
             <BreadcrumbItem color={secondaryText} fontSize="sm" mb="5px">
               <BreadcrumbLink href="#" color={secondaryText}>
-                Pages
+                Home
               </BreadcrumbLink>
             </BreadcrumbItem>
 
@@ -123,7 +132,7 @@ export default function AdminNavbar(props: {
               </BreadcrumbLink>
             </BreadcrumbItem>
           </Breadcrumb>
-          {/* Here we create navbar brand, based on route name */}
+          
           <Link
             color={mainText}
             href="#"
@@ -143,12 +152,15 @@ export default function AdminNavbar(props: {
             }}
           >
             {brandText}
-          </Link>
-        </Box>
-        <Box ms="auto" w={{ sm: '100%', md: 'unset' }}>
-          <AdminNavbarLinks setApiKey={setApiKey} secondary={props.secondary} />
-        </Box>
-      </Flex>
+          </Link>  */}
+        </Box> 
+             <Box ms="auto" w={{ sm: '100%', md: 'unset' }} mt="0px">
+            <NavbarActions setApiKey={setApiKey} secondary={props.secondary} />
+          </Box>  
+
+       
+
+ </Flex>
     </Box>
   );
 }

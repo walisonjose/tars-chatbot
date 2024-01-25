@@ -4,8 +4,11 @@ import {
   ParsedEvent,
   ReconnectInterval,
 } from 'eventsource-parser';
+import { parse } from 'path';
 
-const createPrompt = (inputCode: string) => {
+let messages: { role: string; content: string }[] = [];
+
+export const createPrompt = (inputCode: string) => {
   const data = (inputCode: string) => {
     return endent`${inputCode}`;
   };
@@ -20,9 +23,10 @@ export const OpenAIStream = async (
   model: string,
   key: string | undefined,
 ) => {
-  const prompt = createPrompt(inputCode);
+  // const prompt = createPrompt(inputCode);
 
-  const system = { role: 'system', content: prompt };
+  // const system = { role: 'system', content: prompt };
+  // messages.push({ role: 'system', content: prompt || '' });
 
   const res = await fetch(`https://api.openai.com/v1/chat/completions`, {
     headers: {
@@ -32,7 +36,7 @@ export const OpenAIStream = async (
     method: 'POST',
     body: JSON.stringify({
       model,
-      messages: [system],
+      messages: inputCode,
       temperature: 0,
       stream: true,
     }),
@@ -78,8 +82,10 @@ export const OpenAIStream = async (
       for await (const chunk of res.body as any) {
         parser.feed(decoder.decode(chunk));
       }
+     
     },
   });
+ 
 
   return stream;
 };
