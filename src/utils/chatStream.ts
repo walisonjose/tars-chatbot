@@ -4,9 +4,55 @@ import {
   ParsedEvent,
   ReconnectInterval,
 } from 'eventsource-parser';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { parse } from 'path';
 
 let messages: { role: string; content: string }[] = [];
+
+const genAI = new GoogleGenerativeAI('AIzaSyAlooAo0myCCzy2_e6d94t8wz21nDtQ8NE');
+const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+
+
+export const runChat = (messages: { role: string; content: string }[])=> async () =>{
+
+
+const generationConfig = {
+  temperature: 0.9,
+  topK: 1,
+  topP: 1,
+  maxOutputTokens: 2048,
+};
+
+const safetySettings = [
+  {
+    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+];
+
+const chat = model.startChat({
+  generationConfig,
+  safetySettings,
+  history: messages.map((message) => ({ role: message.role, parts: [message.content] })),
+});
+
+const result = await chat.sendMessage("Olá, COmo vai?");
+    const response = result.response;
+    console.log(response.text());
+
+}
 
 export const createPrompt = (inputCode: string) => {
   const data = (inputCode: string) => {
@@ -27,6 +73,13 @@ export const OpenAIStream = async (
 
   // const system = { role: 'system', content: prompt };
   // messages.push({ role: 'system', content: prompt || '' });
+
+
+console.log('inputCode', inputCode);
+  //await runChat(messages);
+
+
+  return;
 
   const res = await fetch(`https://api.openai.com/v1/chat/completions`, {
     headers: {

@@ -1,5 +1,5 @@
 import { ChatBody } from '@/types/types';
-import { OpenAIStream } from '@/utils/chatStream';
+import { OpenAIStream, runChat } from '@/utils/chatStream';
 
 export const config = {
   runtime: 'edge',
@@ -23,11 +23,13 @@ const handler = async (req: Request): Promise<Response> => {
     if (!apiKey) {
       return new Response('API key not found', { status: 500 });
     }
+    console.log('inputCode==>>', inputCode);
 
-   const stream = await OpenAIStream(inputCode, model, apiKeyFinal);
+  
+   // await OpenAIStream(inputCode, model, apiKeyFinal);
    
-
-    return new Response(stream);
+;
+    new Response(true, { status: 200 });
 
 
   } catch (error) {

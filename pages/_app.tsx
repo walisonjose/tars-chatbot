@@ -175,7 +175,7 @@ function App({ Component, pageProps }: AppProps<{}>) {
   return (
     <ChakraProvider theme={themeInitial}>
       <Box>
-        {/* <Sidebar setApiKey={setApiKey} routes={routes} />  */}
+         <Sidebar setApiKey={setApiKey} routes={routes} />  
         <Box
           pt={{ base: '60px', md: '100px' }}
           float="right"

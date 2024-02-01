@@ -71,8 +71,8 @@ export default function HeaderLinks(props: {
         borderRadius="30px"
       />  */}
        
-       {/*<SidebarResponsive routes={routes} />
-        <APIModal setApiKey={setApiKey} />   */}
+       <SidebarResponsive routes={routes} />
+        {/*<APIModal setApiKey={setApiKey} />   */}
 
         {/* <Menu>
         <MenuButton p="0px">

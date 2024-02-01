@@ -21,10 +21,16 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { MdAutoAwesome, MdBolt, MdEdit, MdPerson } from 'react-icons/md';
 import Bg from '../public/img/chat/bg-image.png';
 import { FaCopy } from 'react-icons/fa';
+import { FaRegCircleStop } from "react-icons/fa6";
+import { AiFillAudio } from "react-icons/ai";
+import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+import { run } from 'node:test';
 
 export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prompt: any, setPrompt: any}) {
   // *** If you use .env.local variable for your API key, method which we recommend, use the apiKey variable commented below
@@ -38,8 +44,17 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
   const [model, setModel] = useState<OpenAIModel>('gpt-3.5-turbo');
   // Loading state
   const [loading, setLoading] = useState<boolean>(false);
+  const [isSoundRecording, setIsSoundRecording] = useState<boolean>(false);
+  const [recognition_obj, setRecognition] = useState(null);
+  const [transcription_data, setTranscription] = useState(null);
+
 
   const [promptMessages, setPromptMessages] = useState<any>([]);
+
+
+  
+
+ 
 
   // API Key
   // const [apiKey, setApiKey] = useState<string>(apiKeyApp);
@@ -62,15 +77,204 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
     { color: 'gray.500' },
     { color: 'whiteAlpha.600' },
   );
+
+// const genAI = new GoogleGenerativeAI('AIzaSyAlooAo0myCCzy2_e6d94t8wz21nDtQ8NE');
+// const modelGoogle = genAI.getGenerativeModel({ model: 'gemini-pro' });
+
+async function runChat(promptMessagesData:any) {
+  const genAI = new GoogleGenerativeAI('AIzaSyAlooAo0myCCzy2_e6d94t8wz21nDtQ8NE');
+  const modelGoogle = genAI.getGenerativeModel({ model: 'gemini-pro' });
+
+  
+  //return;
+
+  const generationConfig = {
+    temperature: 0,
+    topK: 1,
+    topP: 1,
+    maxOutputTokens: 2048,
+  };
+
+  const safetySettings = [
+    {
+      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+  ];
+
+  console.log("promptMessagesData", promptMessagesData);
+
+  let data = [];
+  promptMessagesData.map((prompt)=>{
+    let dataPrompt = {
+      role: prompt.role,
+    }
+   dataPrompt = {
+      ...dataPrompt,
+      parts: [{ text: prompt.content }],
+   }
+
+    data.push(dataPrompt);
+  })
+
+data.push({ role: 'model',  parts: [{ text: "" }] });
+
+
+  const chat = modelGoogle.startChat({
+    generationConfig,
+    safetySettings,
+    history: data,
+  });
+
+
+  try{
+    const result = await chat.sendMessage(inputCode);
+    const response = result.response;
+    return response.text() ;
+  }catch(error){
+    console.log("error", error);
+    alert("Ops, algo deu errado! tente novamente.");
+   // return "Ops, algo deu errado! tente novamente.";
+  }
+  
+ 
+  
+}
+
+
+const createDataArray = (roleParam: string, text: string) => {
+  const role = roleParam;
+  const data = [
+    {
+      role: role,
+      parts: [{ text: text }],
+    },
+  ];
+  return data;
+};
+
+ 
+
+ const startSpeechRecognition = async () => {
+  try {
+    setIsSoundRecording(!isSoundRecording);
+
+    // Request microphone access
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    // Verifique e defina a API de SpeechRecognition
+
+    
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = new SpeechRecognition();
+
+    console.log("recognition ", recognition);
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'pt-BR'; // Set desired language
+    //recognition.maxAlternatives = 1;
+
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map((result) => result[0].transcript)
+        .join('');
+        console.log(transcript);
+
+      setTranscription(transcript);
+      setInputCode(transcript);
+      //handleTranslate();
+    };
+
+    recognition.onerror = (error) => {
+      console.error('Speech recognition error:', error);
+    };
+
+    // Start recognition
+    recognition.start();
+    setRecognition(recognition);
+
+
+  } catch (error) {
+    console.error('Error accessing microphone:', error);
+    alert('Error accessing microphone:', error);
+  }
+};
+
+const stopSpeechRecognition = () => {
+  if (recognition_obj) {
+    console.log("stopSpeechRecognition", recognition_obj);
+    recognition_obj.abort();
+    //setRecognition(null);
+  }
+};
+
+
+  
+
+  // const startSpeechRecognition = async () => {
+  //   try {
+  //     setIsSoundRecording(!isSoundRecording);
+  //     // Request microphone access
+  //     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  
+  //     // Create a new SpeechRecognition instance
+  //     const recognition = new SpeechRecognition();
+  //     recognition.continuous = true;
+  //     recognition.interimResults = true;
+  //     recognition.lang = 'pt-BR'; // Set desired language
+  
+  //     recognition.onresult = (event) => {
+  //       const transcript = Array.from(event.results)
+  //         .map((result) => result[0].transcript)
+  //         .join('');
+  //         console.log(transcript);
+  
+  //       setTranscription(transcript);
+  //     };
+  
+  //     recognition.onerror = (error) => {
+  //       console.error('Speech recognition error:', error);
+  //     };
+  
+  //     // Start recognition
+  //     recognition.start();
+  //     setRecognition(recognition);
+  //   } catch (error) {
+  //     console.error('Error accessing microphone:', error);
+  //   }
+  // };
+  
+  // const stopSpeechRecognition = () => {
+  //   if (recognition) {
+  //     recognition.stop();
+  //     setRecognition(null);
+  //   }
+  // };
+  
+
+ 
+
+
+  
   const handleTranslate = async () => {
     const apiKey = apiKeyApp;
     const promptMessagesData = promptMessages;
-
-    const messagePrompt = prompt ? prompt : inputCode
-    const promptFormated = createPrompt(messagePrompt);
-    const messagePromptFormated = { role: 'user', content: promptFormated };
-    promptMessagesData.push(messagePromptFormated);
-
+   const messagePrompt = prompt ? prompt : inputCode
+   // Adiciona o objeto JSON ao array
+promptMessagesData.push({ role: 'user', content: messagePrompt });
 
     if(prompt){
       setInputCode(prompt);
@@ -82,10 +286,10 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
     // Chat post conditions(maximum number of characters, valid message etc.)
     const maxCodeLength = model === 'gpt-3.5-turbo' ? 700 : 700;
 
-    if (!apiKeyApp?.includes('sk-') && !apiKey?.includes('sk-')) {
-      alert('Please enter an API key.');
-      return;
-    }
+    // if (!apiKeyApp?.includes('sk-') && !apiKey?.includes('sk-')) {
+    //   alert('Please enter an API key.');
+    //   return;
+    // }
 
     // if (!inputCode && prompt !== false) {
     //   alert('Please enter your message.');
@@ -100,76 +304,76 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
     }
     setOutputCode(' ');
     setLoading(true);
-    const controller = new AbortController();
-    const body: ChatBody = {
-      inputCode: promptMessagesData,
-      // prompt ? prompt : inputCode,
-      model,
-      apiKey,
-    };
-
-    // -------------- Fetch --------------
-    const response = await fetch('/api/chatAPI', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      signal: controller.signal,
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      setLoading(false);
-      if (response) {
-        alert(
-          'Something went wrong went fetching from the API. Make sure to use a valid API key.',
-        );
-      }
-      return;
-    }
-
-    const data = response.body;
-
-    if (!data) {
-      setLoading(false);
-      alert('Something went wrong');
-      return;
-    }
-
-    const reader = data.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-    let outPutbackup = '';
-
-    promptMessagesData.push({ role: 'system', content: "" });
-
-    while (!done) {
-      setLoading(true);
-      scrollToBottom();
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-      outPutbackup =  outPutbackup+chunkValue;
-      setOutputCode((prevCode) => prevCode + chunkValue);
-      const outPutCodeFormated = createPrompt(outPutbackup);
-    const messageoutPutCodeFormated = { role: 'system', content: outPutCodeFormated };
+    
+    const result = await runChat(promptMessagesData);
+    setOutputCode(result);
+    promptMessagesData.push({ role: 'model', content: "" });
+    const messageoutPutCodeFormated = { role: 'model', content: result };
      promptMessagesData[promptMessagesData.length - 1] = messageoutPutCodeFormated;
      setPromptMessages(promptMessagesData);
-      scrollToBottom();
-    }
-    //scrollToBottom();
-
-    // const outPutCodeFormated = createPrompt(outPutbackup);
-    // const messageoutPutCodeFormated = { role: 'system', content: outPutCodeFormated };
-    // promptMessagesData.push(messageoutPutCodeFormated);
-    // setPromptMessages(promptMessagesData);
-
-    
-
    
-  //scrollToBottom();
+
+
+    // const controller = new AbortController();
+    // const body: ChatBody = {
+    //   inputCode: promptMessagesData,
+    //   // prompt ? prompt : inputCode,
+    //   model,
+    //   apiKey,
+    // };
+
+    // // -------------- Fetch --------------
+    // const response = await fetch('/api/chatAPI', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   signal: controller.signal,
+    //   body: JSON.stringify(body),
+    // });
+
+    // if (!response.ok) {
+    //   setLoading(false);
+    //   // if (response) {
+    //   //   alert(
+    //   //     'Something went wrong went fetching from the API. Make sure to use a valid API key.',
+    //   //   );
+    //   // }
+    //   return;
+    // }
+
+    // const data = response.body;
+
+    // if (!data) {
+    //   setLoading(false);
+    //   alert('Something went wrong');
+    //   return;
+    // }
+
+    // const reader = data.getReader();
+    // const decoder = new TextDecoder();
+    // let done = false;
+    // let outPutbackup = '';
+
+    // promptMessagesData.push({ role: 'system', content: "" });
+
+    // while (!done) {
+    //   setLoading(true);
+    //   scrollToBottom();
+    //   const { value, done: doneReading } = await reader.read();
+    //   done = doneReading;
+    //   const chunkValue = decoder.decode(value);
+    //   outPutbackup =  outPutbackup+chunkValue;
+    //   setOutputCode((prevCode) => prevCode + chunkValue);
+    //   const outPutCodeFormated = createPrompt(outPutbackup);
+    // const messageoutPutCodeFormated = { role: 'system', content: outPutCodeFormated };
+    //  promptMessagesData[promptMessagesData.length - 1] = messageoutPutCodeFormated;
+    //  setPromptMessages(promptMessagesData);
+    //   scrollToBottom();
+    // }
+    
     setInputCode('');
-    setLoading(false);
+     setLoading(false);
     props.setPrompt(false);
   };
   // -------------- Copy Response --------------
@@ -341,6 +545,7 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
           </Accordion> 
         </Flex>  */}
         {/* Main Box */}
+    
         <Flex
           direction="column"
           w="100%"
@@ -349,6 +554,8 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
           //display={outputCode ? 'flex' : 'none'}
          mb="15px"
         >
+
+         
 
       {    promptMessages.map((message: any, index: number) => {
           return  message.role === 'user' ?  (
@@ -439,8 +646,6 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
             // justifySelf={'flex-end'}
            
         >
-          
-
           <Input
             minH="54px"
             h="100%"
@@ -459,30 +664,49 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
             onChange={handleChange}
           />
 
-       
-          <Button
-            variant="primary"
-            py="20px"
-            px="16px"
-            fontSize="sm"
-            borderRadius="45px"
-            ms="auto"
-            w={{ base: '160px', md: '210px' }}
-            h="54px"
-            _hover={{
-              boxShadow:
-                '0px 21px 27px -10px rgba(96, 60, 255, 0.48) !important',
-              bg:
-                'linear-gradient(15.46deg, #4A25E1 26.3%, #7B5AFF 86.4%) !important',
-              _disabled: {
-                bg: 'linear-gradient(15.46deg, #4A25E1 26.3%, #7B5AFF 86.4%)',
-              },
-            }}
-            onClick={handleTranslate}
-            isLoading={loading ? true : false}
-          >
-            Enviar
-          </Button>
+            <Flex alignItems="center">
+              <Icon
+                as={ isSoundRecording ? FaRegCircleStop : AiFillAudio}
+                onClick={async()=>{
+                  if (isSoundRecording) {
+                    stopSpeechRecognition(); // Chama a função para parar a gravação
+                  } else {
+                    await startSpeechRecognition(); // Inicia a gravação
+                  }
+                  setIsSoundRecording(!isSoundRecording); // Alterna o estado
+                }}
+                cursor={'pointer'}
+                width="40px"
+                height="40px"
+                color="white"
+                mx="10px" // Add horizontal spacing
+              />
+              <Button
+                variant="primary"
+                py="20px"
+                px="16px"
+                fontSize="sm"
+                borderRadius="45px"
+                ms="auto"
+                w={{ base: '160px', md: '180px' }}
+                h="54px"
+                _hover={{
+                  boxShadow:
+                    '0px 21px 27px -10px rgba(96, 60, 255, 0.48) !important',
+                  bg:
+                    'linear-gradient(15.46deg, #4A25E1 26.3%, #7B5AFF 86.4%) !important',
+                  _disabled: {
+                    bg: 'linear-gradient(15.46deg, #4A25E1 26.3%, #7B5AFF 86.4%)',
+                  },
+                }}
+                onClick={handleTranslate}
+                isLoading={loading ? true : false}
+              >
+                Enviar
+              </Button>
+            </Flex>
+            {/* Enviar
+          </Button> */}
         </Flex>
 
          <Flex
@@ -510,3 +734,7 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
     </Flex>
   );
 }
+function setTranscription(transcript: string) {
+  throw new Error('Function not implemented.');
+}
+
