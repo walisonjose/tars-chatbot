@@ -114,7 +114,7 @@ async function runChat(promptMessagesData:any) {
     },
   ];
 
-  console.log("promptMessagesData", promptMessagesData);
+  
 
   let data = [];
   promptMessagesData.map((prompt)=>{

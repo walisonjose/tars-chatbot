@@ -25,11 +25,9 @@ const handler = async (req: Request): Promise<Response> => {
     }
     console.log('inputCode==>>', inputCode);
 
-  
-   // await OpenAIStream(inputCode, model, apiKeyFinal);
-   
-;
-    new Response(true, { status: 200 });
+    // await OpenAIStream(inputCode, model, apiKeyFinal);
+
+    return new Response(JSON.stringify(true), { status: 200 });
 
 
   } catch (error) {
