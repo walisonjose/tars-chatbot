@@ -192,9 +192,8 @@ const createDataArray = (roleParam: string, text: string) => {
       const transcript = Array.from(event.results)
         .map((result) => result[0].transcript)
         .join('');
-        console.log(transcript);
 
-      setTranscription(transcript);
+      //setTranscription(transcript as SetStateAction<string>);
       setInputCode(transcript);
       //handleTranslate();
     };
@@ -205,19 +204,21 @@ const createDataArray = (roleParam: string, text: string) => {
 
     // Start recognition
     recognition.start();
-    setRecognition(recognition);
+    //setRecognition(recognition );
 
 
   } catch (error) {
     console.error('Error accessing microphone:', error);
-    alert('Error accessing microphone:', error);
+    alert('Error accessing microphone:' + error);
   }
 };
 
 const stopSpeechRecognition = () => {
   if (recognition_obj) {
     console.log("stopSpeechRecognition", recognition_obj);
-    recognition_obj.abort();
+    // if (recognition_obj) {
+    //   recognition_obj.abort();
+    // }
     //setRecognition(null);
   }
 };
@@ -307,7 +308,7 @@ promptMessagesData.push({ role: 'user', content: messagePrompt });
     setLoading(true);
     
     const result = await runChat(promptMessagesData);
-    setOutputCode(result);
+    setOutputCode(result || '');
     promptMessagesData.push({ role: 'model', content: "" });
     const messageoutPutCodeFormated = { role: 'model', content: result };
      promptMessagesData[promptMessagesData.length - 1] = messageoutPutCodeFormated;
@@ -666,7 +667,7 @@ promptMessagesData.push({ role: 'user', content: messagePrompt });
           />
 
             <Flex alignItems="center">
-              <Icon
+              {/* <Icon
                 as={ isSoundRecording ? FaRegCircleStop : AiFillAudio}
                 onClick={async()=>{
                   if (isSoundRecording) {
@@ -681,7 +682,7 @@ promptMessagesData.push({ role: 'user', content: messagePrompt });
                 height="40px"
                 color="white"
                 mx="10px" // Add horizontal spacing
-              />
+              /> */}
               <Button
                 variant="primary"
                 py="20px"
