@@ -131,7 +131,7 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
     }
 
     try {
-      const chat = await modelGoogle.generateContentStream([texts]);
+      const chat = await modelGoogle.generateContentStream([texts] as [any]);
       let text = '';
       promptMessagesData.push({ role: 'model', content: "" });
       for await (const chunk of chat.stream) {
