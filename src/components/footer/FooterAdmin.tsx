@@ -24,7 +24,7 @@ export default function Footer() {
       px={{ base: '30px', md: '50px' }}
       pb="30px"
     >
-      <Text
+      {/* <Text
         color={textColor}
         fontSize={{ base: 'xs', md: 'sm' }}
         textAlign={{
@@ -39,7 +39,7 @@ export default function Footer() {
         <Text as="span" fontWeight="500" ms="4px">
           Chilli Apps. All Rights Reserved.
         </Text>
-      </Text>
+      </Text> */}
        {/* <List display="flex">
         <ListItem
           me={{

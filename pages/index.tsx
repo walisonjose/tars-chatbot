@@ -117,9 +117,10 @@ async function runChat(promptMessagesData:any) {
   
 
   let data = [];
-  promptMessagesData.map((prompt)=>{
+  promptMessagesData.map((prompt: { role: any; content: any; })=>{
     let dataPrompt = {
       role: prompt.role,
+      parts: [{ text: "" }],
     }
    dataPrompt = {
       ...dataPrompt,
@@ -712,23 +713,23 @@ promptMessagesData.push({ role: 'user', content: messagePrompt });
          <Flex
           justify="center"
           mt="20px"
-          direction={{ base: 'column', md: 'row' }}
+          direction={{ base: 'column', md: 'column' }}
           alignItems="center"
           textAlign={{ base: 'center', md: 'left' }}
         >
           <Text fontSize="xs" textAlign="center" color={gray}>
-          O Tars é um chatbot que utiliza IA generativa para interagir com o usuário, dada a natureza complexa dessa interação pode fornecer informações imprecisas.
+          O Tars é um chatbot que se pluga a uma IA generativa para interagir com o usuário, dada a natureza complexa dessa interação pode fornecer informações imprecisas.
             </Text>
-          {/* <Link href="https://help.openai.com/en/articles/6825453-chatgpt-release-notes">
+           <Link href="https://deepmind.google/technologies/gemini/#introduction">
             <Text
               fontSize="xs"
               color={textColor}
               fontWeight="500"
               textDecoration="underline"
             >
-              ChatGPT May 12 Version
+              Powered by Gemini Pro
             </Text>
-          </Link> */}
+          </Link> 
         </Flex> 
       </Flex>
     </Flex>

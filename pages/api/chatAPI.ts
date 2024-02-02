@@ -23,7 +23,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (!apiKey) {
       return new Response('API key not found', { status: 500 });
     }
-    console.log('inputCode==>>', inputCode);
+   
 
     // await OpenAIStream(inputCode, model, apiKeyFinal);
 
