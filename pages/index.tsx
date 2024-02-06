@@ -449,7 +449,7 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
   };
 
   return (
-    <Flex
+    <Flex 
       w="100%"
       pt={{ base: '70px', md: '0px' }}
       direction="column"
