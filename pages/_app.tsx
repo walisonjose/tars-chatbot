@@ -64,6 +64,7 @@ function App({ Component, pageProps }: AppProps<{}>) {
   //const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    (document.body.style as any).zoom = "80%";
     setIsMobile(window.innerWidth <= 768);
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -212,7 +213,6 @@ function App({ Component, pageProps }: AppProps<{}>) {
             minH="100vh"
             pt="50px"
           >
-            
             <Flex direction="column" mb="8">
               <Text
                 as="span"
