@@ -203,117 +203,6 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
   };
 
 
-
-  const startSpeechRecognition = async () => {
-    try {
-      setIsSoundRecording(!isSoundRecording);
-
-      // Request microphone access
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-      // Verifique e defina a API de SpeechRecognition
-
-
-
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      let recognition = new SpeechRecognition();
-
-      console.log("recognition ", recognition);
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'pt-BR'; // Set desired language
-      recognition.maxAlternatives = 1;
-
-      recognition.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map((result) => result[0].transcript)
-          .join('');
-
-        //setTranscription(transcript as SetStateAction<string>);
-        setInputCode(transcript);
-        //handleTranslate();
-      };
-
-      recognition.onerror = (error) => {
-        console.error('Speech recognition error:', error);
-      };
-
-      // Start recognition
-      recognition.start();
-      //setRecognition(recognition );
-
-
-    } catch (error) {
-      console.error('Error accessing microphone:', error);
-      alert('Error accessing microphone:' + error);
-    }
-  };
-
-  const  handleStartRecording=()=> {
-    const isSpeechRecognitionAPIAvailable =
-      "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
-
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      let  speechRecognition = new SpeechRecognition();
-
-      setRecognition(speechRecognition);
-
-    if (!isSpeechRecognitionAPIAvailable) {
-      alert("Infelizmente seu navegador não suporta a API de gravação!");
-      return;
-    }
-
-    setIsSoundRecording(true);
-
-   // setIsRecording(true);
-    //setShouldShowOnboarding(false);
-
-    speechRecognition.lang = "pt-BR";
-    speechRecognition.continuous = true;
-    speechRecognition.maxAlternatives = 1;
-    speechRecognition.interimResults = true;
-
-    speechRecognition.onresult = (event) => {
-      console.log("event", event);
-      const transcription = Array.from(event.results).reduce((text, result) => {
-        return text.concat(result[0].transcript);
-      }, "");
-   console.log("transcription", transcription);
-      //setContent(transcription);
-    };
-
-    // speechRecognition.onresult = (event) => {
-    //   const transcript = Array.from(event.results)
-    //     .map((result) => result[0].transcript)
-    //     .join('');
-
-    // speechRecognition.onerror = (event) => {
-    //   console.error(event);
-    // };
-
-    speechRecognition.start();
-  }
-
-
-
-  const handleStopRecording = () => {
-    setIsSoundRecording(true);
-    if (recognition_obj !== null) {
-      recognition_obj.stop();
-    }
-  };
-
-  const stopSpeechRecognition = () => {
-    if (recognition_obj) {
-      console.log("stopSpeechRecognition", recognition_obj);
-      recognition_obj.stop();
-      //setRecognition(null);
-    }
-  };
-
-
-
-
   // const startSpeechRecognition = async () => {
   //   try {
   //     setIsSoundRecording(!isSoundRecording);
@@ -655,9 +544,10 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
             return message.role === 'user' ? (
 
               <>
-                <Flex w="100%" align={'center'} mb="35px">
+                <Flex w="100%" align={'center'} mb="35px" >
                   <Flex
                     borderRadius="full"
+                  
                     justify="center"
                     align="center"
                     bg={'transparent'}
