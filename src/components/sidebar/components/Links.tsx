@@ -53,6 +53,7 @@ export function SidebarLinks(props: SidebarLinksProps) {
   // this function creates the links and collapses that appear in the sidebar (left menu)
   const createLinks = (routes: IRoute[]) => {
     return routes.map((route, key) => {
+      console.log(route);
       if (route.collapse && !route.invisible) {
         return (
           <Accordion defaultIndex={0} allowToggle key={key}>
@@ -177,7 +178,7 @@ export function SidebarLinks(props: SidebarLinksProps) {
                   letterSpacing="0px"
                   px="8px"
                 >
-                  PRO
+                  PRO2
                 </Badge>
               </Link>
             </Flex>
@@ -202,7 +203,7 @@ export function SidebarLinks(props: SidebarLinksProps) {
                     activeRoute(route.path.toLowerCase()) ? '22px' : '26px'
                   }
                 >
-                  {route.name === 'Chat UI' ? (
+                  {route.name !== 'Chat UI' ? (
                     <NavLink
                       href={
                         route.layout ? route.layout + route.path : route.path
@@ -216,13 +217,14 @@ export function SidebarLinks(props: SidebarLinksProps) {
                         justifyContent="center"
                       >
                         <Box
-                          color={
-                            route.disabled
-                              ? gray
-                              : activeRoute(route.path.toLowerCase())
-                              ? activeIcon
-                              : inactiveColor
-                          }
+                        color={activeIcon}
+                          // color={
+                          //   route.disabled
+                          //     ? gray
+                          //     : activeRoute(route.path.toLowerCase())
+                          //     ? activeIcon
+                          //     : inactiveColor
+                          // }
                           me="12px"
                           mt="6px"
                         >
@@ -230,13 +232,14 @@ export function SidebarLinks(props: SidebarLinksProps) {
                         </Box>
                         <Text
                           me="auto"
-                          color={
-                            route.disabled
-                              ? gray
-                              : activeRoute(route.path.toLowerCase())
-                              ? activeColor
-                              : 'gray.500'
-                          }
+                          color={activeColor}
+                          // color={
+                          //   route.disabled
+                          //     ? gray
+                          //     : activeRoute(route.path.toLowerCase())
+                          //     ? activeColor
+                          //     : 'gray.500'
+                          // }
                           fontWeight="500"
                           letterSpacing="0px"
                           fontSize="sm"
@@ -245,7 +248,7 @@ export function SidebarLinks(props: SidebarLinksProps) {
                         </Text>
                       </Flex>
                     </NavLink>
-                  ) : (
+                   ) : (
                     <Flex
                       w="100%"
                       alignItems="center"
@@ -299,15 +302,16 @@ export function SidebarLinks(props: SidebarLinksProps) {
                         </Badge>
                       </Link>
                     </Flex>
-                  )}
+                  )} 
                 </HStack>
               </Flex>
             ) : (
               <ListItem ms={0} cursor="not-allowed" opacity={'0.4'}>
                 <Flex ps="32px" alignItems="center" mb="8px">
                   <Text
+                  //color={activeColor}
                     color={
-                      route.disabled
+                      route.disabled 
                         ? gray
                         : activeRoute(route.path.toLowerCase())
                         ? activeColor

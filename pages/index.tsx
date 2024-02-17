@@ -32,6 +32,10 @@ import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognitio
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { run } from 'node:test';
 
+// const SpeechRecognitionAPI =
+//     window.SpeechRecognition || window.webkitSpeechRecognition;
+//   const speechRecognition = new SpeechRecognitionAPI();
+
 export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prompt: any, setPrompt: any }) {
   // *** If you use .env.local variable for your API key, method which we recommend, use the apiKey variable commented below
   const { apiKeyApp, isMobile, prompt } = props;
@@ -69,6 +73,11 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
     { color: 'gray.500' },
     { color: 'whiteAlpha.600' },
   );
+
+
+
+
+  
 
 
 
@@ -213,7 +222,7 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = 'pt-BR'; // Set desired language
-      //recognition.maxAlternatives = 1;
+      recognition.maxAlternatives = 1;
 
       recognition.onresult = (event) => {
         const transcript = Array.from(event.results)
@@ -240,12 +249,64 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
     }
   };
 
+  const  handleStartRecording=()=> {
+    const isSpeechRecognitionAPIAvailable =
+      "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      let  speechRecognition = new SpeechRecognition();
+
+      setRecognition(speechRecognition);
+
+    if (!isSpeechRecognitionAPIAvailable) {
+      alert("Infelizmente seu navegador não suporta a API de gravação!");
+      return;
+    }
+
+    setIsSoundRecording(true);
+
+   // setIsRecording(true);
+    //setShouldShowOnboarding(false);
+
+    speechRecognition.lang = "pt-BR";
+    speechRecognition.continuous = true;
+    speechRecognition.maxAlternatives = 1;
+    speechRecognition.interimResults = true;
+
+    speechRecognition.onresult = (event) => {
+      console.log("event", event);
+      const transcription = Array.from(event.results).reduce((text, result) => {
+        return text.concat(result[0].transcript);
+      }, "");
+   console.log("transcription", transcription);
+      //setContent(transcription);
+    };
+
+    // speechRecognition.onresult = (event) => {
+    //   const transcript = Array.from(event.results)
+    //     .map((result) => result[0].transcript)
+    //     .join('');
+
+    // speechRecognition.onerror = (event) => {
+    //   console.error(event);
+    // };
+
+    speechRecognition.start();
+  }
+
+
+
+  const handleStopRecording = () => {
+    setIsSoundRecording(true);
+    if (recognition_obj !== null) {
+      recognition_obj.stop();
+    }
+  };
+
   const stopSpeechRecognition = () => {
     if (recognition_obj) {
       console.log("stopSpeechRecognition", recognition_obj);
-      // if (recognition_obj) {
-      //   recognition_obj.abort();
-      // }
+      recognition_obj.stop();
       //setRecognition(null);
     }
   };
@@ -705,12 +766,14 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
           />
 
           <Flex alignItems="center" mt={{ base: '10px', md: '0' }}>
-            {/* <Icon
+             {/* <Icon
               as={ isSoundRecording ? FaRegCircleStop : AiFillAudio}
               onClick={async()=>{
                 if (isSoundRecording) {
-                  stopSpeechRecognition(); // Chama a função para parar a gravação
+                  stopSpeechRecognition();
+                  //handleStopRecording(); // Chama a função para parar a gravação
                 } else {
+                  //handleStartRecording(); // Chama a função para iniciar a gravação
                   await startSpeechRecognition(); // Inicia a gravação
                 }
                 setIsSoundRecording(!isSoundRecording); // Alterna o estado
@@ -720,7 +783,7 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
               height="40px"
               color="white"
               mx="10px" // Add horizontal spacing
-            /> */}
+            />  */}
             <Button
               variant="primary"
               py="20px"
