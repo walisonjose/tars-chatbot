@@ -65,14 +65,14 @@ function Sidebar(props: SidebarProps) {
         overflowX="hidden"
         boxShadow={shadow}
       >
-        <Scrollbars
+        {/* <Scrollbars
           autoHide
           renderTrackVertical={renderTrack}
           renderThumbVertical={renderThumb}
           renderView={renderView}
         >
           <Content setApiKey={setApiKey} routes={routes} />
-        </Scrollbars>
+        </Scrollbars> */}
       </Box>
     </Box>
   );

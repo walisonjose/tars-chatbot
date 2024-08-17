@@ -34,13 +34,13 @@ const routes: IRoute[] = [
     icon: (<Icon as={FaPenFancy } width="20px" height="20px" color="inherit" />),
     collapse: false,
   },
-  {
-    name: 'Fazendo uma pergunta',
-    disabled: false,
-    path: '/my-projects',
-    icon: (<Icon as={BsFillQuestionSquareFill } width="20px" height="20px" color="inherit" />),
-    collapse: false,
-  }
+  // {
+  //   name: 'Fazendo uma pergunta',
+  //   disabled: false,
+  //   path: '/my-projects',
+  //   icon: (<Icon as={BsFillQuestionSquareFill } width="20px" height="20px" color="inherit" />),
+  //   collapse: false,
+  // }
   
   // {
   //   name: 'Assistente',

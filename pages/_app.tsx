@@ -94,21 +94,21 @@ function App({ Component, pageProps }: AppProps<{}>) {
 
   const dataBlocks = [
     {
-      title: 'Assitência Jurídica',
+      title: 'Documentos',
       buttons: [
         {
           text: 'Revise este documento pra mim.',
           onClick: (prompt: any) => { 
             setPrompt(prompt);
            },
-          prompt: 'Diga como pode ajudar na revisão de um documento.',
+          prompt: 'Diga como pode me ajudar na revisão de um documento.',
         },
         {
           text: 'Me forneça um modelo de contrato',
           onClick: (prompt: any) => { 
             setPrompt(prompt);
            },
-          prompt: 'Forneça um modelo básico de um contrato de trabalho.',
+          prompt: 'Forneça um modelo básico de um contrato de trabalho comum com todas as informações básicas.',
         },
         {
           text: 'Analise esta tese jurídica',

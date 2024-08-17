@@ -74,14 +74,7 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
     { color: 'whiteAlpha.600' },
   );
 
-
-
-
-  
-
-
-
-  async function runChat(promptMessagesData: any) {
+ async function runChat(promptMessagesData: any) {
     const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_API_KEY || '');
     const modelGoogle = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
@@ -157,7 +150,7 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
 
     } catch (error) {
       console.log("error", error);
-      alert("Ops, algo deu errado! tente novamente.");
+      alert("Ops! Algo deu errado! Tente novamente.");
       // return "Ops, algo deu errado! tente novamente.";
     }
 
