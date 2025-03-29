@@ -267,6 +267,7 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
     //   alert('Please enter your message.');
     //   return;
     // }
+    
 
     if (inputCode.length > maxCodeLength) {
       alert(
