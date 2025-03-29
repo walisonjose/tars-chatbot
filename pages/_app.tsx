@@ -176,9 +176,9 @@ function App({ Component, pageProps }: AppProps<{}>) {
   return (
     <ChakraProvider theme={themeInitial}>
       <Box>
-         <Sidebar setApiKey={setApiKey} routes={routes} />  
+         {/* <Sidebar setApiKey={setApiKey} routes={routes} />   */}
         <Box
-          pt={{ base: '60px', md: '100px' }}
+          pt={{ base: '60px', md: '10px' }}
           float="right"
           minHeight="100vh"
           height="100%"

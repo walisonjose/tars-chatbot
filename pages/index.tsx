@@ -76,7 +76,7 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
 
  async function runChat(promptMessagesData: any) {
     const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_API_KEY || '');
-    const modelGoogle = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const modelGoogle = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 
     //return;
@@ -409,10 +409,10 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
       />  */}
       <Flex
         direction="column"
-        mx="auto"
+        mx="10px"
         w={{ base: '100%', md: '100%', xl: '100%' }}
         minH={{ base: '75vh', '2xl': '85vh' }}
-        maxW="1000px"
+        maxW="1050px"
       >
         {/* Model Change 
         <Flex direction={'column'} w="100%" mb={outputCode ? '20px' : 'auto'}>
@@ -525,7 +525,7 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
         <Flex
           direction="column"
           w="100%"
-          mx="auto"
+          mx="10px"
           display="flex"
           //display={outputCode ? 'flex' : 'none'}
           mb="15px"
@@ -619,11 +619,10 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
         </Flex>
         {/* Chat Input */}
         <Flex
-          ms={{ base: '0px', xl: '-130px' }}
-          mt={isMobile ? "-35px" : "20px"}
-          // justifySelf={'flex-end'}
-          direction={{ base: 'column', md: 'row' }}
-          alignItems={{ base: 'center', md: 'center' }}
+            ms={{ base: '0px', xl: '0px' }}
+            mt={ isMobile ?  "-35px" :  "20px"} 
+            // justifySelf={'flex-end'}
+           
         >
           <Input
             minH="54px"
