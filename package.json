@@ -16,6 +16,7 @@
     "@codemirror/legacy-modes": "^6.3.2",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
+    "@google/generative-ai": "^0.24.0",
     "@heroicons/react": "^2.0.17",
     "@material-tailwind/react": "^1.4.2",
     "@tanstack/react-table": "^8.5.15",

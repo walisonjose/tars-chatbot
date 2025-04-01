@@ -25,6 +25,8 @@ import { useEffect, useState } from 'react';
 import { MdAutoAwesome, MdBolt, MdEdit, MdPerson } from 'react-icons/md';
 import Bg from '../public/img/chat/bg-image.png';
 import { FaCopy } from 'react-icons/fa';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+import { run } from 'node:test';
 
 export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prompt: any, setPrompt: any}) {
   // *** If you use .env.local variable for your API key, method which we recommend, use the apiKey variable commented below
@@ -62,6 +64,174 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
     { color: 'gray.500' },
     { color: 'whiteAlpha.600' },
   );
+
+ async function runChat(promptMessagesData: any) {
+    const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_API_KEY || '');
+    const modelGoogle = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+
+    //return;
+
+    const generationConfig = {
+      temperature: 0,
+      topK: 1,
+      topP: 1,
+      maxOutputTokens: 2048,
+    };
+
+    const safetySettings = [
+      {
+        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+    ];
+
+
+
+    let data = [];
+    promptMessagesData.map((prompt: { role: any; content: any; }) => {
+      let dataPrompt = {
+        role: prompt.role,
+        parts: [{ text: "" }],
+      }
+      dataPrompt = {
+        ...dataPrompt,
+        parts: [{ text: prompt.content }],
+      }
+
+      data.push(dataPrompt);
+    })
+
+    data.push({ role: 'model', parts: [{ text: "" }] });
+
+    const texts = [];
+    for (const item of data) {
+      texts.push({
+        text: item?.parts[0].text
+      });
+    }
+
+    try {
+      const chat = await modelGoogle.generateContentStream([texts] as [any]);
+      let text = '';
+      promptMessagesData.push({ role: 'model', content: "" });
+      for await (const chunk of chat.stream) {
+        const chunkText = chunk.text();
+        text += chunkText;
+        setOutputCode((prevCode) => prevCode + text);
+        const outPutCodeFormated = createPrompt(text);
+        const messageoutPutCodeFormated = { role: 'model', content: outPutCodeFormated };
+        promptMessagesData[promptMessagesData.length - 1] = messageoutPutCodeFormated;
+        setPromptMessages(promptMessagesData);
+        scrollToBottom();
+      }
+
+
+    } catch (error) {
+      console.log("error", error);
+      alert("Ops! Algo deu errado! Tente novamente.");
+      // return "Ops, algo deu errado! tente novamente.";
+    }
+
+
+    //outPutbackup =  outPutbackup+chunkValue;
+    //   setOutputCode((prevCode) => prevCode + chunkValue);
+    //   const outPutCodeFormated = createPrompt(outPutbackup);
+    // const messageoutPutCodeFormated = { role: 'system', content: outPutCodeFormated };
+    //  promptMessagesData[promptMessagesData.length - 1] = messageoutPutCodeFormated;
+    //  setPromptMessages(promptMessagesData);
+
+    // modelGoogle.startChat({
+    //   generationConfig,
+    //   safetySettings,
+    //   history: data,
+    // });
+
+
+    // try {
+    //   // const result = await chat.sendMessage(inputCode);
+    //   // const response = result.response;
+    //   // return response.text() ;
+    // } catch (error) {
+    //   console.log("error", error);
+    //   alert("Ops, algo deu errado! tente novamente.");
+    //   // return "Ops, algo deu errado! tente novamente.";
+    // }
+
+
+
+  }
+
+
+  const createDataArray = (roleParam: string, text: string) => {
+    const role = roleParam;
+    const data = [
+      {
+        role: role,
+        parts: [{ text: text }],
+      },
+    ];
+    return data;
+  };
+
+
+  // const startSpeechRecognition = async () => {
+  //   try {
+  //     setIsSoundRecording(!isSoundRecording);
+  //     // Request microphone access
+  //     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+  //     // Create a new SpeechRecognition instance
+  //     const recognition = new SpeechRecognition();
+  //     recognition.continuous = true;
+  //     recognition.interimResults = true;
+  //     recognition.lang = 'pt-BR'; // Set desired language
+
+  //     recognition.onresult = (event) => {
+  //       const transcript = Array.from(event.results)
+  //         .map((result) => result[0].transcript)
+  //         .join('');
+  //         console.log(transcript);
+
+  //       setTranscription(transcript);
+  //     };
+
+  //     recognition.onerror = (error) => {
+  //       console.error('Speech recognition error:', error);
+  //     };
+
+  //     // Start recognition
+  //     recognition.start();
+  //     setRecognition(recognition);
+  //   } catch (error) {
+  //     console.error('Error accessing microphone:', error);
+  //   }
+  // };
+
+  // const stopSpeechRecognition = () => {
+  //   if (recognition) {
+  //     recognition.stop();
+  //     setRecognition(null);
+  //   }
+  // };
+
+
+
+
+
+
   const handleTranslate = async () => {
     const apiKey = apiKeyApp;
     const promptMessagesData = promptMessages;
@@ -82,10 +252,10 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
     // Chat post conditions(maximum number of characters, valid message etc.)
     const maxCodeLength = model === 'gpt-3.5-turbo' ? 700 : 700;
 
-    if (!apiKeyApp?.includes('sk-') && !apiKey?.includes('sk-')) {
-      alert('Please enter an API key.');
-      return;
-    }
+    // if (!apiKeyApp?.includes('sk-') && !apiKey?.includes('sk-')) {
+    //   alert('Please enter an API key.');
+    //   return;
+    // }
 
     // if (!inputCode && prompt !== false) {
     //   alert('Please enter your message.');
@@ -100,63 +270,66 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
     }
     setOutputCode(' ');
     setLoading(true);
-    const controller = new AbortController();
-    const body: ChatBody = {
-      inputCode: promptMessagesData,
-      // prompt ? prompt : inputCode,
-      model,
-      apiKey,
-    };
 
-    // -------------- Fetch --------------
-    const response = await fetch('/api/chatAPI', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      signal: controller.signal,
-      body: JSON.stringify(body),
-    });
+    const result = await runChat(promptMessagesData);
 
-    if (!response.ok) {
-      setLoading(false);
-      if (response) {
-        alert(
-          'Something went wrong went fetching from the API. Make sure to use a valid API key.',
-        );
-      }
-      return;
-    }
+    // const controller = new AbortController();
+    // const body: ChatBody = {
+    //   inputCode: promptMessagesData,
+    //   // prompt ? prompt : inputCode,
+    //   model,
+    //   apiKey,
+    // };
 
-    const data = response.body;
+    // // -------------- Fetch --------------
+    // const response = await fetch('/api/chatAPI', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   signal: controller.signal,
+    //   body: JSON.stringify(body),
+    // });
 
-    if (!data) {
-      setLoading(false);
-      alert('Something went wrong');
-      return;
-    }
+    // if (!response.ok) {
+    //   setLoading(false);
+    //   if (response) {
+    //     alert(
+    //       'Something went wrong went fetching from the API. Make sure to use a valid API key.',
+    //     );
+    //   }
+    //   return;
+    // }
 
-    const reader = data.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-    let outPutbackup = '';
+    // const data = response.body;
 
-    promptMessagesData.push({ role: 'system', content: "" });
+    // if (!data) {
+    //   setLoading(false);
+    //   alert('Something went wrong');
+    //   return;
+    // }
 
-    while (!done) {
-      setLoading(true);
-      scrollToBottom();
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-      outPutbackup =  outPutbackup+chunkValue;
-      setOutputCode((prevCode) => prevCode + chunkValue);
-      const outPutCodeFormated = createPrompt(outPutbackup);
-    const messageoutPutCodeFormated = { role: 'system', content: outPutCodeFormated };
-     promptMessagesData[promptMessagesData.length - 1] = messageoutPutCodeFormated;
-     setPromptMessages(promptMessagesData);
-      scrollToBottom();
-    }
+    // const reader = data.getReader();
+    // const decoder = new TextDecoder();
+    // let done = false;
+    // let outPutbackup = '';
+
+    // promptMessagesData.push({ role: 'system', content: "" });
+
+    // while (!done) {
+    //   setLoading(true);
+    //   scrollToBottom();
+    //   const { value, done: doneReading } = await reader.read();
+    //   done = doneReading;
+    //   const chunkValue = decoder.decode(value);
+    //   outPutbackup =  outPutbackup+chunkValue;
+    //   setOutputCode((prevCode) => prevCode + chunkValue);
+    //   const outPutCodeFormated = createPrompt(outPutbackup);
+    // const messageoutPutCodeFormated = { role: 'system', content: outPutCodeFormated };
+    //  promptMessagesData[promptMessagesData.length - 1] = messageoutPutCodeFormated;
+    //  setPromptMessages(promptMessagesData);
+    //   scrollToBottom();
+    // }
     //scrollToBottom();
 
     // const outPutCodeFormated = createPrompt(outPutbackup);
@@ -229,10 +402,10 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
       />  */}
       <Flex
         direction="column"
-        mx="auto"
+        mx="10px"
         w={{ base: '100%', md: '100%', xl: '100%' }}
         minH={{ base: '75vh', '2xl': '85vh' }}
-        maxW="1000px"
+        maxW="1050px"
       >
         {/* Model Change 
         <Flex direction={'column'} w="100%" mb={outputCode ? '20px' : 'auto'}>
@@ -344,7 +517,7 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
         <Flex
           direction="column"
           w="100%"
-          mx="auto"
+          mx="10px"
           display="flex"
           //display={outputCode ? 'flex' : 'none'}
          mb="15px"
@@ -434,7 +607,7 @@ export default function Chat(props: { apiKeyApp: string, isMobile: boolean, prom
         </Flex>
         {/* Chat Input */}
         <Flex
-            ms={{ base: '0px', xl: '-130px' }}
+            ms={{ base: '0px', xl: '0px' }}
             mt={ isMobile ?  "-35px" :  "20px"} 
             // justifySelf={'flex-end'}
            
